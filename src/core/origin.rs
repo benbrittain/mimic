@@ -2,9 +2,10 @@ use allocative::Allocative;
 
 use starlark::{
     any::ProvidesStaticType,
-    values::{AllocValue, Heap, NoSerialize, StarlarkValue, UnpackValue, Value, ValueLike},
+    values::{
+        starlark_value, AllocValue, Heap, NoSerialize, StarlarkValue, UnpackValue, Value, ValueLike,
+    },
 };
-use starlark_derive::starlark_value;
 use std::fmt::{self, Display};
 
 #[derive(Debug, ProvidesStaticType, NoSerialize, Allocative)]

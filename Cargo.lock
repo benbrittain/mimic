@@ -2203,6 +2203,5 @@ dependencies = [
  "git2",
  "serde",
  "starlark",
- "starlark_derive",
  "superconsole",
 ]

@@ -1,15 +1,17 @@
 use allocative::Allocative;
 use anyhow::Result;
+use starlark::starlark_module;
+use starlark::values::starlark_value;
 use starlark::{
     any::ProvidesStaticType,
     environment::GlobalsBuilder,
     values::{AllocValue, Heap, NoSerialize, StarlarkValue, Value},
 };
-use starlark_derive::{starlark_module, starlark_value};
 use std::fmt::{self, Display};
 
 mod origin;
 pub use origin::*;
+
 mod destination;
 pub use destination::*;
 
@@ -34,6 +36,7 @@ struct Workflow {
     origin: Origin,
     destination: Destination,
 }
+
 #[starlark_value(type = "workflow")]
 impl<'v> StarlarkValue<'v> for Workflow {}
 

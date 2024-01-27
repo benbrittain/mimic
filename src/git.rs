@@ -1,15 +1,15 @@
 use allocative::Allocative;
+use starlark::starlark_module;
 use starlark::{
     any::ProvidesStaticType,
     environment::GlobalsBuilder,
     starlark_simple_value,
     typing::{Param, Ty},
     values::{
-        typing::StarlarkCallable, AllocValue, Freeze, Freezer, Heap, NoSerialize, StarlarkValue,
-        Trace, UnpackValue, Value, ValueLike,
+        starlark_value, typing::StarlarkCallable, AllocValue, Freeze, Freezer, Heap, NoSerialize,
+        StarlarkValue, Trace, UnpackValue, Value, ValueLike,
     },
 };
-use starlark_derive::{starlark_module, starlark_value};
 use std::fmt::{self, Display};
 
 use crate::core::{Destination, Origin};
