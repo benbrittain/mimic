@@ -1,9 +1,9 @@
 def _tag_mirror_impl(ctx):
-    pass
-#    ctx.run(move("src/", ""))
+    ctx.copy("src/", "")
+    return ctx.success()
 
 def tag_mirror():
-  return git.dynamic_tags(impl = _tag_mirror_impl) #, params = {} )
+  return transform(impl = _tag_mirror_impl) #, params = {} )
 
 workflow(
     name = "test-migration",
@@ -17,3 +17,5 @@ workflow(
     ),
 #    transforms = tag_mirror(), #core.move("src", ""),
 )
+
+tag_mirror()

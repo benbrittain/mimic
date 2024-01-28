@@ -10,7 +10,7 @@ use std::{cell::RefCell, path::PathBuf};
 mod core;
 mod git;
 
-use crate::core::starlark_workflow;
+use crate::core::{starlark_transform, Context, starlark_workflow};
 use crate::git::starlark_git;
 
 #[derive(Debug, ProvidesStaticType, Default)]
@@ -38,6 +38,7 @@ fn main() -> Result<(), starlark::Error> {
     // We build our globals adding some functions we wrote
     let globals = GlobalsBuilder::new()
         .with(starlark_workflow)
+        .with(starlark_transform)
         .with_struct("git", starlark_git)
         .build();
     let module = Module::new();
@@ -48,10 +49,27 @@ fn main() -> Result<(), starlark::Error> {
         eval.extra = Some(&store);
         eval.eval_module(ast, &globals)?
     };
-    let workflow = workflow
-        .downcast_ref::<core::Workflow>()
-        .expect("code should return a workflow");
-    workflow.execute()?;
+    let transform = workflow
+        .downcast_ref::<core::Transform>()
+        .expect("code should return a transform");
+    dbg!(transform);
+    let res = {
+        let heap = module.heap();
+        let mut eval = Evaluator::new(&module);
+        eval.eval_function(
+            transform.implementation,
+            &[heap.alloc(Context::new()?)],
+            &[]
+            //&[heap.alloc(4), heap.alloc(2), heap.alloc(1)],
+            //&[("x", heap.alloc(8))],
+        )?
+    };
+    dbg!(res);
+        //transform.execute()?;
+    //let transform = transform
+    //    .downcast_ref::<core::Workflow>()
+    //    .expect("code should return a workflow");
+    //workflow.execute()?;
     dbg!(&*store.0.borrow());
     Ok(())
 }
