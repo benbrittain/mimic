@@ -14,6 +14,7 @@ pub struct Destination {
     pub branch: String,
     pub tags: Vec<String>,
 }
+
 #[starlark_value(type = "origin")]
 impl<'v> StarlarkValue<'v> for Destination {}
 

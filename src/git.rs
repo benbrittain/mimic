@@ -23,7 +23,7 @@ pub fn starlark_git(builder: &mut GlobalsBuilder) {
     fn destination(
         url: String,
         branch: String,
-        tags: DynamicTagCallable,
+        //tags: DynamicTagCallable,
     ) -> anyhow::Result<Destination> {
         Ok(Destination {
             url,
