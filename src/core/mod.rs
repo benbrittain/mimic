@@ -1,5 +1,5 @@
 use allocative::Allocative;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use git2::Repository;
 use starlark::starlark_module;
 use starlark::values::starlark_value;
@@ -57,6 +57,23 @@ impl<'v> AllocValue<'v> for Workflow {
     }
 }
 
+fn print_time(time: &git2::Time, prefix: &str) {
+    let (offset, sign) = match time.offset_minutes() {
+        n if n < 0 => (-n, '-'),
+        n => (n, '+'),
+    };
+    let (hours, minutes) = (offset / 60, offset % 60);
+    let seconds = time.seconds();
+
+    let datetime: chrono::DateTime<chrono::Utc> =
+        chrono::DateTime::from_timestamp(seconds, 0).unwrap();
+
+    // Format the datetime how you want
+    let newdate = datetime.format("%Y-%m-%d %H:%M:%S");
+
+    println!("{prefix}{newdate} {sign}{hours:02}{minutes:02}");
+}
+
 fn print_commit(commit: &git2::Commit) {
     println!("commit {}", commit.id());
 
@@ -70,8 +87,8 @@ fn print_commit(commit: &git2::Commit) {
 
     let author = commit.author();
     println!("Author: {}", author);
-    //print_time(&author.when(), "Date:   ");
-    //println!();
+    print_time(&author.when(), "Date:   ");
+    println!();
 
     for line in String::from_utf8_lossy(commit.message_bytes()).lines() {
         println!("    {}", line);
@@ -169,12 +186,17 @@ impl Workflow {
             origin_repo
                 .checkout_tree(&treeish, Some(git2::build::CheckoutBuilder::new().force()))?;
             let commit = treeish.peel_to_commit()?;
-            let message = commit.message().unwrap();
+            let message = format!(
+                "{}\nGitOrigin-RevId: {}",
+                commit.message().unwrap(),
+                commit.id()
+            );
+            let author_sig = commit.author();
+            let commiter_sig = commit.committer();
 
             // TODO RUN THE TRANSFORMS HERE INSTEAD
             copy_recursively(origin_repo.workdir().unwrap(), dest_repo.workdir().unwrap())?;
 
-            let sig = git2::Signature::now("Mimic", "migrate@mimic.dev")?;
             let parent_commit = find_last_commit(&dest_repo)?;
             print_commit(&parent_commit);
             let mut index = dest_repo.index()?;
@@ -183,15 +205,13 @@ impl Workflow {
             let oid = index.write_tree()?;
             dest_repo.commit(
                 Some("HEAD"),
-                &sig,
-                &sig,
+                &author_sig,
+                &commiter_sig,
                 &message,
                 &dest_repo.find_tree(oid)?,
                 &[&parent_commit],
-            )?; // parents
+            )?;
         }
-
-        //let dest_repo = Repository::clone(&self.destination.url, "./cache/dest")?;
         Ok(())
     }
 }
