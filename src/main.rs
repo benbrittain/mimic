@@ -37,7 +37,7 @@ fn main() -> Result<(), starlark::Error> {
 
     // We build our globals adding some functions we wrote
     let globals = GlobalsBuilder::new()
-        .with_struct("core", starlark_workflow)
+        .with(starlark_workflow)
         .with_struct("git", starlark_git)
         .build();
     let module = Module::new();
